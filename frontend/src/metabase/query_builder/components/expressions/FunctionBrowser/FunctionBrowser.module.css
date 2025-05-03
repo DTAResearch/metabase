@@ -2,6 +2,7 @@
   background-color: var(--mb-color-bg-light);
   border-left: 1px solid var(--mb-color-border);
   height: 100%;
+  font-family: var(--mb-default-font-family);
 }
 
 .results {

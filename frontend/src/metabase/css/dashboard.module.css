@@ -239,3 +239,8 @@
   pointer-events: all;
   user-select: auto;
 }
+
+.DashCard {
+  /* Các thuộc tính CSS */
+  border: 1px solid red; /* Ví dụ */
+}

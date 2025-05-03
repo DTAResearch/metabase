@@ -1,3 +1,5 @@
+
+
 interface Window {
   MetabaseBootstrap: any;
   MetabaseRoot?: string;

@@ -10,4 +10,5 @@
 
 .root {
   font-weight: inherit;
+  font-family: var(--mb-default-font-family);
 }

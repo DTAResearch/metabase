@@ -475,6 +475,5 @@ export const defaultFontFiles = ({ baseUrl = "./" } = {}) => {
         font-style: normal;
         font-display: swap;
       }
-    }
     `;
 };

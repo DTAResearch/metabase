@@ -91,3 +91,8 @@ export const getThemeSpecificCssVariables = (theme: MantineTheme) => css`
     })
     .join("\n")}
 `;
+
+export const cssVariables = css`
+  --mb-default-font-family: "Times New Roman", serif;
+  --mb-default-monospace-font-family: "Times New Roman", serif;
+`;

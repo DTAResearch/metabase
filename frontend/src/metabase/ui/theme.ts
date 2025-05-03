@@ -172,3 +172,8 @@ export const getThemeOverrides = (): MantineThemeOverride => ({
   },
   other: DEFAULT_METABASE_COMPONENT_THEME,
 });
+
+export const theme = {
+  fontFamily: "var(--mb-default-font-family), serif",
+  fontFamilyMonospace: "var(--mb-default-font-family), serif", // Đồng bộ monospace
+};

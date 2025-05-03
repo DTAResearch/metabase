@@ -1,6 +1,8 @@
+
 // @ts-check
 /* eslint-env node */
 /* eslint-disable import/no-commonjs */
+
 const fs = require("fs");
 
 const ReactRefreshPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
@@ -88,8 +90,8 @@ class OnScriptError {
         (data, cb) => {
           // Manipulate the content
           data.assetTags.scripts.forEach(script => {
-            script.attributes.onerror = `Metabase.AssetErrorLoad(this)`;
-          });
+            script.attributes.onerror = `${getApplicationName()}.AssetErrorLoad(this)`;
+        });
           // Tell webpack to move on
           cb(null, data);
         },
@@ -202,7 +204,8 @@ const config = {
     alias: {
       assets: ASSETS_PATH,
       fonts: FONTS_PATH,
-      metabase: SRC_PATH,
+      // metabase: SRC_PATH,
+      metabase: path.resolve(__dirname, "src/metabase"),
       "metabase-lib": LIB_SRC_PATH,
       "metabase-enterprise": ENTERPRISE_SRC_PATH,
       "metabase-types": TYPES_SRC_PATH,
@@ -395,3 +398,7 @@ if (devMode) {
 }
 
 module.exports = config;
+function getApplicationName() {
+  throw new Error("Function not implemented.");
+}
+
