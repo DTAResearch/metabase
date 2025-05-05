@@ -29,8 +29,8 @@ export const GlobalStyles = (): JSX.Element => {
       ${cssVariables}
       :root {
         /* --mb-default-font-family: "${font}"; */
-        --mb-default-font-family: "Times New Roman", serif;
-        --mb-default-monospace-font-family: "Times New Roman", serif;
+        --mb-default-font-family: "Arial", sans-serif;
+        --mb-default-monospace-font-family: "Arial", sans-serif;
       }
 
       ${defaultFontFiles({ baseUrl: sitePath })}

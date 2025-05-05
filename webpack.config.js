@@ -204,8 +204,8 @@ const config = {
     alias: {
       assets: ASSETS_PATH,
       fonts: FONTS_PATH,
-      // metabase: SRC_PATH,
-      metabase: path.resolve(__dirname, "src/metabase"),
+      metabase: SRC_PATH,
+      // metabase: path.resolve(__dirname, "src/metabase"),
       "metabase-lib": LIB_SRC_PATH,
       "metabase-enterprise": ENTERPRISE_SRC_PATH,
       "metabase-types": TYPES_SRC_PATH,
