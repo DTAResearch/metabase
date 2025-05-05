@@ -64,10 +64,10 @@ export const EditModeContainer = styled(TextCardWrapper)<EditModeProps>`
     pointer-events: all;
   }
 
-  /* .${DashboardS.DashCard}:hover &,
+  .${DashboardS.DashCard}:hover &,
   .${DashboardS.DashCard}:focus-within & {
     border: 1px solid var(--mb-color-brand);
-  } */
+  }
 
   .${DashboardS.DashCard}.resizing & {
     border: 1px solid var(--mb-color-brand);
