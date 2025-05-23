@@ -1,7 +1,9 @@
+/* eslint-disable import/no-unresolved */
 // eslint-disable-next-line no-restricted-imports
 import { Global, css } from "@emotion/react";
 import { useMemo } from "react";
 
+// eslint-disable-next-line import/no-unresolved
 import { baseStyle, rootStyle } from "metabase/css/core/base.styled";
 import { defaultFontFiles } from "metabase/css/core/fonts.styled";
 import { getSitePath } from "metabase/lib/dom";
@@ -26,7 +28,9 @@ export const GlobalStyles = (): JSX.Element => {
     return css`
       ${cssVariables}
       :root {
-        --mb-default-font-family: "${font}";
+        /* --mb-default-font-family: "${font}"; */
+        --mb-default-font-family: "Arial", sans-serif;
+        --mb-default-monospace-font-family: "Arial", sans-serif;
       }
 
       ${defaultFontFiles({ baseUrl: sitePath })}

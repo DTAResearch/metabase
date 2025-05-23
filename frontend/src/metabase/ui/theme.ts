@@ -129,8 +129,8 @@ export const getThemeOverrides = (): MantineThemeOverride => ({
       },
     },
   },
-  fontFamily: "var(--mb-default-font-family), sans-serif",
-  fontFamilyMonospace: "Monaco, monospace",
+  fontFamily: "var(--mb-default-font-family), Arial, sans-serif",
+  fontFamilyMonospace: "Arial, monospace",
   components: {
     ...accordionOverrides,
     ...actionIconOverrides,
@@ -180,3 +180,8 @@ export const getThemeOverrides = (): MantineThemeOverride => ({
   },
   other: DEFAULT_METABASE_COMPONENT_THEME,
 });
+
+export const theme = {
+  fontFamily: "var(--mb-default-font-family), Arial, serif",
+  fontFamilyMonospace: "var(--mb-default-font-family), Arial, serif", // Đồng bộ monospace
+};
