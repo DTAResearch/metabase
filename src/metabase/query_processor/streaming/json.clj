@@ -3,8 +3,7 @@
   response with all the metadata for `:api`."
   (:require
    [medley.core :as m]
-   [metabase.formatter :as formatter]
-   [metabase.models.visualization-settings :as mb.viz]
+   [metabase.formatter.core :as formatter]
    [metabase.query-processor.pivot.postprocess :as qp.pivot.postprocess]
    [metabase.query-processor.streaming.common :as streaming.common]
    [metabase.query-processor.streaming.interface :as qp.si]
@@ -12,8 +11,7 @@
   (:import
    (com.fasterxml.jackson.core JsonGenerator)
    (java.io BufferedWriter OutputStream OutputStreamWriter)
-   (java.nio.charset StandardCharsets)
-   (metabase.formatter NumericWrapper TextWrapper)))
+   (java.nio.charset StandardCharsets)))
 
 (set! *warn-on-reflection* true)
 
@@ -38,7 +36,7 @@
     (reify qp.si/StreamingResultsWriter
       (begin! [_ {{:keys [ordered-cols results_timezone format-rows?]
                    :or   {format-rows? true}} :data} viz-settings]
-        (let [cols           (streaming.common/column-titles ordered-cols (::mb.viz/column-settings viz-settings) format-rows?)
+        (let [cols           (streaming.common/column-titles ordered-cols viz-settings format-rows?)
               pivot-grouping (qp.pivot.postprocess/pivot-grouping-index cols)]
           (when pivot-grouping (vreset! pivot-grouping-idx pivot-grouping))
           (let [names (cond->> cols
@@ -74,8 +72,8 @@
                      ;; inference to know if we should or should not parse a string (or not stringify an object).
                      (let [res (formatter (streaming.common/format-value r))]
                        (cond
-                         (instance? NumericWrapper res) (:num-str res)
-                         (instance? TextWrapper res)    (:text-str res)
+                         (formatter/NumericWrapper? res) (:num-str res)
+                         (formatter/TextWrapper? res)    (:text-str res)
                          :else                          res)))
                    @ordered-formatters cleaned-row))
              writer {})

@@ -5,14 +5,15 @@
   `toJSMap` functions to turn Clojure's normal datastructures into js native structures."
   (:require
    [clojure.string :as str]
+   [metabase.appearance.core :as appearance]
    [metabase.channel.render.js.engine :as js.engine]
    [metabase.channel.render.style :as style]
-   [metabase.config :as config]
-   [metabase.settings.deprecated-grab-bag :as public-settings]
-   [metabase.util.delay :as delay]
+   [metabase.config.core :as config]
+   [metabase.lib-be.core :as lib-be]
+   [metabase.premium-features.core :as premium-features]
    [metabase.util.json :as json])
   (:import
-   (io.aleph.dirigiste Pool IPool$Generator IPool$Controller Pools Stats)
+   (io.aleph.dirigiste IPool$Controller IPool$Generator Pool Pools Stats)
    (java.io ByteArrayInputStream ByteArrayOutputStream)
    (java.nio.charset StandardCharsets)
    (java.util.concurrent TimeUnit)
@@ -60,7 +61,7 @@
                ;; Generate a tuple of the engine and the expiry timestamp.
                [(load-viz-bundle (js.engine/context))
                 (+ (System/nanoTime) (.toNanos TimeUnit/MINUTES 10))])
-             (destroy [_ _ v]))
+             (destroy [_ _ _v]))
            ;; Wrap the utilization controller with a modification that doesn't allow the pool to go below 1 instance.
            (reify IPool$Controller
              (shouldIncrement [_ k a b] (.shouldIncrement base-controller k a b))
@@ -78,7 +79,9 @@
            10000 ;; Recheck every 10 seconds
            TimeUnit/MILLISECONDS)))
 
-(defn do-with-static-viz-context [f]
+(defn do-with-static-viz-context
+  "Impl for [[with-static-viz-context]]."
+  [f]
   (if config/is-dev?
     (f (load-viz-bundle (js.engine/context)))
     (loop []
@@ -125,9 +128,9 @@
       node)))
 
 (defn- clear-style-node
-  "The echarts library (whose output we get via the :javascript_visualization multimethod) adds a <style> tag that we don't need.
-  It has some invalid styles that Batik warns about, but they're all for :hover states,
-  which have no meaning or effect in the static-viz context anyway."
+  "The echarts library (whose output we get via the [[*javascript-visualization*]] function) adds a `<style>` tag that
+  we don't need. It has some invalid styles that Batik warns about, but they're all for :hover states, which have no
+  meaning or effect in the static-viz context anyway."
   [^Node node]
   (letfn [(element? [x] (instance? Element x))]
     (if (and (element? node)
@@ -137,7 +140,8 @@
       node)))
 
 (defn- sanitize-svg
-  "Using a regex of negated allowed characters according to the XML 1.0 spec, replace disallowed characters with an empty string."
+  "Using a regex of negated allowed characters according to the XML 1.0 spec, replace disallowed characters with an
+  empty string."
   [svg-string]
   (let [allowed-chars (re-pattern (str "[^"
                                        "\u0009"
@@ -185,26 +189,31 @@
   (-> s parse-svg-string render-svg))
 
 (defn funnel
-  "Clojure entrypoint to render a funnel chart. Data should be vec of [[Step Measure]] where Step is {:name name :format format-options} and Measure is {:format format-options} and you go and look to frontend/src/metabase/static-viz/components/FunnelChart/types.ts for the actual format options.
-  Returns a byte array of a png file."
+  "Clojure entrypoint to render a funnel chart. Data should be vec of [[Step Measure]] where Step is
+
+    {:name name :format format-options}
+
+  and Measure is {:format format-options} and you go and look to
+  frontend/src/metabase/static-viz/components/FunnelChart/types.ts for the actual format options. Returns a byte array
+  of a png file."
   [data settings]
   (let [svg-string (with-static-viz-context context
                      (.asString (js.engine/execute-fn-name context "funnel" (json/encode data)
-                                                           (json/encode settings))))]
+                                                           (json/encode settings)
+                                                           (json/encode (premium-features/token-features)))))]
     (svg-string->bytes svg-string)))
 
 (defn ^:dynamic *javascript-visualization*
-  "Clojure entrypoint to render javascript visualizations.
-This functions is dynanic only for testing purposes."
+  "Clojure entrypoint to render javascript visualizations. This functions is dynanic only for testing purposes."
   [cards-with-data dashcard-viz-settings]
   (let [response (with-static-viz-context context
                    (.asString (js.engine/execute-fn-name context "javascript_visualization"
                                                          (json/encode cards-with-data)
                                                          (json/encode dashcard-viz-settings)
-                                                         (json/encode {:applicationColors (public-settings/application-colors)
-                                                                       :startOfWeek (public-settings/start-of-week)
-                                                                       :customFormatting (public-settings/custom-formatting)
-                                                                       :tokenFeatures (public-settings/token-features)}))))]
+                                                         (json/encode {:applicationColors (appearance/application-colors)
+                                                                       :startOfWeek (lib-be/start-of-week)
+                                                                       :customFormatting (appearance/custom-formatting)
+                                                                       :tokenFeatures (premium-features/token-features)}))))]
     (-> response
         json/decode+kw
         (update :type (fnil keyword "unknown")))))
@@ -216,7 +225,8 @@ This functions is dynanic only for testing purposes."
                      (.asString (js.engine/execute-fn-name context "row_chart"
                                                            (json/encode settings)
                                                            (json/encode data)
-                                                           (json/encode (public-settings/application-colors)))))]
+                                                           (json/encode (appearance/application-colors))
+                                                           (json/encode (premium-features/token-features)))))]
     (svg-string->bytes svg-string)))
 
 (defn gauge
@@ -225,7 +235,8 @@ This functions is dynanic only for testing purposes."
   (with-static-viz-context context
     (let [js-res (js.engine/execute-fn-name context "gauge"
                                             (json/encode card)
-                                            (json/encode data))
+                                            (json/encode data)
+                                            (json/encode (premium-features/token-features)))
           svg-string (.asString js-res)]
       (svg-string->bytes svg-string))))
 
@@ -236,7 +247,8 @@ This functions is dynanic only for testing purposes."
     (let [js-res (js.engine/execute-fn-name context "progress"
                                             (json/encode {:value value :goal goal})
                                             (json/encode settings)
-                                            (json/encode (public-settings/application-colors)))
+                                            (json/encode (appearance/application-colors))
+                                            (json/encode (premium-features/token-features)))
           svg-string (.asString js-res)]
       (svg-string->bytes svg-string))))
 

@@ -15,9 +15,9 @@
    [metabase.driver.mysql :as mysql]
    [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
    [metabase.driver.util :as driver.u]
+   [metabase.lib-be.metadata.jvm :as lib.metadata.jvm]
    [metabase.lib.core :as lib]
    [metabase.lib.metadata :as lib.metadata]
-   [metabase.lib.metadata.jvm :as lib.metadata.jvm]
    [metabase.lib.schema.id :as lib.schema.id]
    [metabase.models.interface :as mi]
    [metabase.permissions.models.data-permissions :as data-perms]
@@ -634,6 +634,7 @@
   "Because life is too short for zillions of temp files."
   [^String s]
   (let [bytes (.getBytes s "UTF-8")]
+    #_{:clj-kondo/ignore [:missing-protocol-method]}
     (reify
       io/IOFactory
       (make-input-stream [_ _opts]
