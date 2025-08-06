@@ -1,0 +1,27 @@
+
+services:
+  metabase:
+    # image: metabase-custom # Sử dụng image tùy chỉnh
+    image: metabase/metabase:latest
+    container_name: metabase
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5002:3000"
+    volumes:
+      - ./metabase-data:/metabase-data
+    environment:
+      - MB_DB_FILE=/metabase-data/metabase.db
+      - MB_DB_TYPE=h2
+      - MB_DB_DBNAME=/metabase-data/metabase.db
+      - MB_DB_PORT=3000
+      - MB_DB_USER=metabase
+      - MB_DB_PASS=metabase
+      - MB_DB_HOST=metabase
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    external: false
